@@ -1,0 +1,14 @@
+{
+    "name": "@convertible/audioconverter",
+    "version": "1.0.0",
+    "description": "Audio converter integration for convertible",
+    "main": "src/index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "dependencies": {
+        "@convertible/engine": "^1.0.0",
+        "fluent-ffmpeg": "^2.1.2",
+        "@ffmpeg-installer/ffmpeg": "^1.1.0"
+    }
+} 

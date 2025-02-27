@@ -1,0 +1,13 @@
+{
+    "name": "@convertible/imageconverter",
+    "version": "1.0.0",
+    "description": "Image converter integration for convertible",
+    "main": "src/index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "dependencies": {
+        "@convertible/engine": "^1.0.0",
+        "imagemagick": "^0.1.3"
+    }
+} 

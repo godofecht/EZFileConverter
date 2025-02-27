@@ -1,0 +1,22 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom styles */
+.header-gradient {
+    background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
+}
+
+/* Theme transitions */
+[data-theme] {
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Dropzone styles */
+.dropzone {
+    transition: border-color 0.3s ease, background-color 0.3s ease;
+}
+
+.dropzone.dragover {
+    @apply border-primary bg-base-200 border-opacity-50;
+} 

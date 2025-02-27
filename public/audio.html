@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="cupcake">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Convertible - Audio</title>
+    <link href="/css/output.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@3.9.0/dist/full.css" rel="stylesheet">
+    <!-- Add FFmpeg.wasm -->
+    <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.11.0/dist/ffmpeg.min.js"></script>
+</head>
+<body class="min-h-screen bg-base-200">
+    <div class="fixed top-4 right-4 z-50">
+        <div class="dropdown dropdown-end">
+            <label tabindex="0" class="btn btn-circle btn-ghost">
+                <!-- Theme/Palette icon -->
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                </svg>
+            </label>
+            <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
+                <li><a onclick="setTheme('light')">Light</a></li>
+                <li><a onclick="setTheme('dark')">Dark</a></li>
+                <li><a onclick="setTheme('cupcake')">Cupcake</a></li>
+                <li><a onclick="setTheme('cyberpunk')">Cyberpunk</a></li>
+                <li><a onclick="setTheme('forest')">Forest</a></li>
+                <li><a onclick="setTheme('neon')">Neon</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <div class="header-gradient text-white py-8 mb-8">
+        <div class="container mx-auto px-4">
+            <h1 class="text-4xl md:text-5xl font-bold text-center">
+                Convertible
+            </h1>
+            <p class="text-center mt-2 opacity-90">
+                Convert any file format
+            </p>
+            <div class="flex justify-center mt-4">
+                <div class="dropdown">
+                    <label tabindex="0" class="btn btn-wide m-1">
+                        <span>Audio Converter</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                        </svg>
+                    </label>
+                    <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
+                        <li><a href="/">Image Converter</a></li>
+                        <li><a href="/audio.html">Audio Converter</a></li>
+                        <li><a href="/daw.html">DAW Project Converter</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mx-auto px-4">
+        <div class="card bg-base-100 shadow-xl">
+            <div class="card-body">
+                <form id="uploadForm" class="space-y-6">
+                    <!-- File Upload Area -->
+                    <div id="filePreview" 
+                         class="dropzone min-h-[300px] max-h-[600px] overflow-y-auto p-4 rounded-lg border-2 border-dashed">
+                        <!-- Initial Drop Message -->
+                        <div id="dropMessage" class="flex flex-col items-center justify-center h-[300px] text-center">
+                            <div class="upload-icon mb-4">
+                                <svg class="mx-auto h-16 w-16 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                                    <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" 
+                                        stroke-width="2" 
+                                        stroke-linecap="round" 
+                                        stroke-linejoin="round" />
+                                </svg>
+                            </div>
+                            <h3 class="text-lg font-semibold mb-2">Drop your audio files here</h3>
+                            <p class="text-gray-600">or click to select files</p>
+                        </div>
+                    </div>
+
+                    <input type="file" 
+                           id="audio" 
+                           name="images" 
+                           multiple 
+                           accept="audio/*" 
+                           class="hidden" />
+
+                    <!-- Conversion Options -->
+                    <div id="conversionOptions" class="space-y-6 hidden">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- Format Selection -->
+                            <div class="form-control">
+                                <label class="label">
+                                    <span class="label-text">Output Format</span>
+                                </label>
+                                <select id="format" name="format" class="select select-bordered w-full">
+                                    <option value="mp3">MP3 - Most compatible</option>
+                                    <option value="wav">WAV - Lossless audio</option>
+                                    <option value="ogg">OGG - Open format</option>
+                                    <option value="m4a">M4A - AAC audio</option>
+                                    <option value="flac">FLAC - Best quality</option>
+                                </select>
+                            </div>
+
+                            <!-- Quality/Bitrate -->
+                            <div class="form-control">
+                                <label class="label">
+                                    <span class="label-text">Quality</span>
+                                </label>
+                                <select id="bitrate" name="bitrate" class="select select-bordered w-full">
+                                    <option value="128k">128kbps - Good</option>
+                                    <option value="192k" selected>192kbps - Better</option>
+                                    <option value="256k">256kbps - High</option>
+                                    <option value="320k">320kbps - Best</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-full">Convert Audio</button>
+                    </div>
+                </form>
+
+                <!-- Loading State -->
+                <div id="loading" class="hidden">
+                    <div class="flex justify-center items-center gap-2">
+                        <span class="loading loading-spinner"></span>
+                        <span>Converting audio...</span>
+                    </div>
+                </div>
+
+                <!-- Results -->
+                <div id="result" class="mt-6 space-y-4"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/converter.js"></script>
+    <script>
+        const fileInput = document.getElementById('audio');
+        const filePreview = document.getElementById('filePreview');
+        const uploadForm = document.getElementById('uploadForm');
+        const loading = document.getElementById('loading');
+        const result = document.getElementById('result');
+
+        // File handling
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            filePreview.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            filePreview.addEventListener(eventName, () => {
+                filePreview.classList.add('border-primary');
+            });
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            filePreview.addEventListener(eventName, () => {
+                filePreview.classList.remove('border-primary');
+            });
+        });
+
+        filePreview.addEventListener('drop', handleDrop);
+        fileInput.addEventListener('change', handleFileSelect);
+        filePreview.addEventListener('click', () => fileInput.click());
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            handleFiles(files);
+        }
+
+        function handleFileSelect(e) {
+            const files = e.target.files;
+            handleFiles(files);
+        }
+
+        function handleFiles(files) {
+            document.getElementById('conversionOptions').classList.remove('hidden');
+            document.getElementById('dropMessage').style.display = 'none';
+
+            Array.from(files).forEach(file => {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    const previewCard = document.createElement('div');
+                    previewCard.className = 'card bg-base-100 shadow-sm mb-4';
+                    previewCard.innerHTML = `
+                        <div class="card-body p-4">
+                            <h3 class="card-title text-sm">${file.name}</h3>
+                            <p class="text-xs opacity-70">${formatFileSize(file.size)}</p>
+                            <audio controls class="w-full mt-2">
+                                <source src="${reader.result}" type="${file.type}">
+                                Your browser does not support the audio element.
+                            </audio>
+                        </div>
+                    `;
+                    filePreview.appendChild(previewCard);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // Wait for converter to be initialized
+        async function initializeConverter() {
+            // Wait for converter script to load
+            while (!window.audioConverter) {
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+            return window.audioConverter;
+        }
+
+        // Form submission
+        uploadForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            try {
+                // Get converter instance
+                const converter = await initializeConverter();
+                
+                // Get files and options
+                const files = fileInput.files;
+                const format = document.getElementById('format').value;
+                const bitrate = document.getElementById('bitrate').value;
+                
+                const loading = document.getElementById('loading');
+                const result = document.getElementById('result');
+                const submitButton = e.target.querySelector('button[type="submit"]');
+                
+                loading.classList.remove('hidden');
+                submitButton.disabled = true;
+                submitButton.innerHTML = `
+                    <span class="loading loading-spinner loading-sm"></span>
+                    Converting...
+                `;
+                
+                // Convert each file
+                const results = [];
+                for (const file of files) {
+                    const convertedFile = await converter.convertAudio(file, format, bitrate);
+                    results.push(convertedFile);
+                }
+                
+                // Display results
+                result.innerHTML = `
+                    <div class="collapse bg-base-200">
+                        <input type="checkbox" checked /> 
+                        <div class="collapse-title flex justify-between items-center">
+                            <div class="flex items-center gap-2">
+                                <h2 class="text-lg font-semibold">Conversion Results</h2>
+                                <div class="badge badge-success">${results.length} files</div>
+                            </div>
+                        </div>
+                        <div class="collapse-content">
+                            <div id="resultsGrid" class="grid grid-cols-1 gap-4 pt-4">
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                const resultsGrid = document.getElementById('resultsGrid');
+                
+                results.forEach(file => {
+                    resultsGrid.insertAdjacentHTML('afterbegin', `
+                        <div class="card bg-base-100 shadow-xl">
+                            <div class="card-body p-4">
+                                <h3 class="card-title text-sm">${file.filename}</h3>
+                                <p class="text-xs opacity-70">
+                                    Converted from: ${file.originalName}<br>
+                                    Original Size: ${formatFileSize(file.originalSize)}<br>
+                                    Converted Size: ${formatFileSize(file.size)}<br>
+                                    Bitrate: ${bitrate}
+                                </p>
+                                <audio controls class="w-full mt-2">
+                                    <source src="${file.data}" type="${file.mimeType}">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="card-actions justify-end mt-2">
+                                    <a href="${file.data}" 
+                                       download="${file.filename}" 
+                                       class="btn btn-primary btn-sm">Download</a>
+                                </div>
+                            </div>
+                        </div>
+                    `);
+                });
+                
+            } catch (error) {
+                console.error('Conversion error:', error);
+                result.innerHTML = `
+                    <div class="alert alert-error">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span>Error: ${error.message}</span>
+                    </div>
+                `;
+            } finally {
+                loading.classList.add('hidden');
+                submitButton.disabled = false;
+                submitButton.textContent = 'Convert Audio';
+            }
+        });
+
+        // Theme handling
+        function setTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+        }
+
+        // Load saved theme
+        const savedTheme = localStorage.getItem('theme') || 'cupcake';
+        setTheme(savedTheme);
+    </script>
+</body>
+</html> 
