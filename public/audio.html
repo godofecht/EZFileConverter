@@ -134,7 +134,7 @@
         </div>
     </div>
 
-    <script src="/js/converter.js"></script>
+    <script src="/js/audio-converter.js"></script>
     <script>
         const fileInput = document.getElementById('audio');
         const filePreview = document.getElementById('filePreview');
@@ -214,9 +214,12 @@
 
         // Wait for converter to be initialized
         async function initializeConverter() {
-            // Wait for converter script to load
-            while (!window.audioConverter) {
+            // Wait for converter script to load, but not forever
+            for (let i = 0; i < 100 && !window.audioConverter; i++) {
                 await new Promise(resolve => setTimeout(resolve, 100));
+            }
+            if (!window.audioConverter) {
+                throw new Error('The audio converter did not load. Check your connection and reload the page.');
             }
             return window.audioConverter;
         }
@@ -224,6 +227,7 @@
         // Form submission
         uploadForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+            const submitButton = e.target.querySelector('button[type="submit"]');
             
             try {
                 // Get converter instance
@@ -233,10 +237,6 @@
                 const files = fileInput.files;
                 const format = document.getElementById('format').value;
                 const bitrate = document.getElementById('bitrate').value;
-                
-                const loading = document.getElementById('loading');
-                const result = document.getElementById('result');
-                const submitButton = e.target.querySelector('button[type="submit"]');
                 
                 loading.classList.remove('hidden');
                 submitButton.disabled = true;
