@@ -56,6 +56,9 @@
         <div class="max-w-3xl mx-auto">
             <div class="card bg-base-100 shadow-xl">
                 <div class="card-body">
+                    <div id="notImplemented" role="status" class="alert alert-warning mb-6">
+                        <span>DAW project conversion is not implemented yet. You can choose files and options to see the planned interface, but nothing is converted. The image and audio converters work.</span>
+                    </div>
                     <form id="uploadForm">
                         <!-- File Upload Area -->
                         <div class="form-control">
@@ -117,7 +120,7 @@
                             </div>
                         </div>
 
-                        <button type="submit" class="btn btn-primary w-full">Convert Project</button>
+                        <button type="submit" class="btn btn-primary w-full" disabled title="DAW project conversion is not implemented yet">Not available yet</button>
                     </form>
 
                     <!-- Loading State -->
@@ -322,6 +325,7 @@
         // Form submission
         uploadForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+            const submitButton = e.target.querySelector('button[type="submit"]');
             
             try {
                 const files = fileInput.files;
@@ -337,7 +341,6 @@
                 };
 
                 loading.classList.remove('hidden');
-                const submitButton = e.target.querySelector('button[type="submit"]');
                 submitButton.disabled = true;
                 submitButton.innerHTML = `
                     <span class="loading loading-spinner loading-sm"></span>
@@ -445,8 +448,8 @@
                 `;
             } finally {
                 loading.classList.add('hidden');
-                submitButton.disabled = false;
-                submitButton.textContent = 'Convert Project';
+                submitButton.disabled = true;
+                submitButton.textContent = 'Not available yet';
             }
         });
     </script>

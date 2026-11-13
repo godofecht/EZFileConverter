@@ -8,7 +8,12 @@ class DAWConverter {
         };
     }
 
+    // Not implemented: no server handles /api/convert/daw yet, and the
+    // dawconverter workspace has no conversion code. The request below is the
+    // planned interface. Fail with a clear message instead of a server error.
     async convertProject(file, format, options = {}) {
+        throw new Error('DAW project conversion is not implemented yet.');
+        // eslint-disable-next-line no-unreachable
         try {
             // Create form data
             const formData = new FormData();
