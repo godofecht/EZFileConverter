@@ -6,7 +6,7 @@ A local file converter, built because file conversion websites should not exist.
 
 EZFileConverter changes files from one format to another on your own computer. Uploading a file to a website to change its format is a bad trade: you hand a stranger your file to get something your own machine can do.
 
-It has three pages. The image converter turns pictures into JPEG, PNG or WebP and sets their quality. An audio converter and a DAW (digital audio workstation, music production software such as Ableton Live or FL Studio) project converter are started but do not work yet. See "Project status".
+It has three pages. The image converter turns pictures into JPEG, PNG or WebP and sets their quality. The audio converter turns sound files into MP3, WAV, OGG, M4A or FLAC. A DAW (digital audio workstation, music production software such as Ableton Live or FL Studio) project converter is started but not implemented, and its page says so. See "Project status".
 
 The interface is built with Vite (a development web server) and Tailwind (a CSS toolkit), and there is a Tauri target so it can be a desktop app instead of a browser tab.
 
@@ -44,6 +44,8 @@ The pages use addresses that start from the site root, such as `/css/output.css`
 
 The terminal prints `VITE ... ready` and `Local: http://localhost:3000/`. In the browser you should see the "Convertible" image converter. Drag pictures onto the drop area or click it to choose files, pick an output format and a quality, and convert. Each result has a download link.
 
+To convert sound, open `http://localhost:3000/audio.html`, choose one or more audio files, pick a format and a bitrate, and press **Convert Audio**. The first conversion downloads ffmpeg (about 25 MB) from unpkg.com, so it needs an internet connection and takes a few seconds. Each result has a player and a **Download** button.
+
 Stop the server with Ctrl and C in the terminal.
 
 ### Controls
@@ -57,15 +59,19 @@ Stop the server with Ctrl and C in the terminal.
 
 ## How it works
 
-The image converter runs in your browser. `public/js/converter.js` hands each picture to the [browser-image-compression](https://github.com/Donaldcwl/browser-image-compression) library, which redraws it at the chosen format and quality and returns a new file. The file never leaves your computer.
+Both working converters run in your browser, so your files never leave your computer.
+
+The image converter `public/js/converter.js` hands each picture to the [browser-image-compression](https://github.com/Donaldcwl/browser-image-compression) library, which redraws it at the chosen format and quality and returns a new file.
+
+The audio converter uses [ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm), the ffmpeg program compiled to WebAssembly. `public/js/audio-converter.js` writes your file into ffmpeg's in-memory file system, runs ffmpeg with an encoder for the chosen format (LAME for MP3, Vorbis for OGG, AAC for M4A, FLAC, or plain PCM for WAV), and reads the result back. It uses the single-threaded build of ffmpeg.wasm, because the faster multi-threaded build only runs on pages served with cross-origin isolation headers.
 
 The repository also holds the start of a server-side design: a conversion engine with one "mode" per kind of file, using [sharp](https://sharp.pixelplumbing.com/) for images and [fluent-ffmpeg](https://github.com/fluent-ffmpeg/node-fluent-ffmpeg) for audio. Nothing starts that server yet.
 
 | File or folder | What is in it |
 |---|---|
 | `public/index.html` | The image converter page |
-| `public/audio.html` | The audio converter page (not working yet) |
-| `public/daw.html` | The DAW project converter page (not working yet) |
+| `public/audio.html` | The audio converter page |
+| `public/daw.html` | The DAW project converter page (not implemented; the page says so) |
 | `public/js/` | Browser code for each converter |
 | `public/css/` | Tailwind source (`styles.css`) and the built stylesheet (`output.css`) |
 | `engine/src/` | The shared conversion engine, base class and server |
@@ -80,7 +86,7 @@ The repository also holds the start of a server-side design: a conversion engine
 
 1. Add a quality preset. In `public/index.html`, find the `presets` list in `updateQualityLabel` and add one.
 2. Change the default format. In `public/index.html`, move another `<option>` to the top of the format list.
-3. Fix the audio page. `public/audio.html` loads `/js/converter.js`, which has no `convertAudio` function. The audio code is in `public/js/audio-converter.js`. Load that file instead, and find out what else ffmpeg in the browser needs.
+3. Add a sample-rate option to the audio page. In `encoderArgs` in `public/js/audio-converter.js`, add `'-ar', '22050'` and listen to the difference.
 4. Show the size saving. Each result from `convertImage` in `public/js/converter.js` has `originalSize` and `size`. Show the percentage saved.
 5. Add a new converter, such as text encoding. Follow `Extending.md`, using `engine/src/BaseMode.js` as the base class.
 
@@ -125,9 +131,9 @@ The root `package.json` is an npm workspace with four packages: `engine` (`@conv
 
 Work in progress. No tests.
 
-- Image conversion in the browser is the working part.
-- The audio page calls `converter.convertAudio`, which `public/js/converter.js` does not define, so audio conversion fails.
-- The DAW page sends files to `/api/convert/daw`, which no server provides, and `DAWMode.convertFromCommonFormat` throws "Not implemented yet".
+- Image and audio conversion in the browser work.
+- The audio converter loads ffmpeg.wasm from unpkg.com on first use, so it does not work offline.
+- DAW project conversion is not implemented. The page shows a notice and the convert button is disabled. No server handles `/api/convert/daw`, and `DAWMode.convertFromCommonFormat` throws "Not implemented yet".
 - The server-side engine is never started. `imageconverter/src/ImageMode.js` imports `@img-convert/engine`, a package name that does not exist in this project.
 - AVIF and TIFF output depends on what the browser can encode and may not give a real AVIF or TIFF file.
 
@@ -135,8 +141,6 @@ Work in progress. No tests.
 
 You can use, copy and change this code for any purpose, as long as you keep the copyright notice. See [LICENSE](LICENSE) (MIT).
 
-The author also asks that nobody host this on a server and charge people to use it through an online portal, which is the one thing it exists to avoid. That request is not part of the MIT licence.
-
 ## Credits
 
-Written by Abhishek Shivakumar. Built with [Vite](https://vitejs.dev/), [Tailwind CSS](https://tailwindcss.com/), [daisyUI](https://daisyui.com/), [browser-image-compression](https://github.com/Donaldcwl/browser-image-compression), [Express](https://expressjs.com/), [sharp](https://sharp.pixelplumbing.com/), [fluent-ffmpeg](https://github.com/fluent-ffmpeg/node-fluent-ffmpeg) and [Tauri](https://tauri.app/). To cite this work, see [CITATION.cff](CITATION.cff).
+Written by Abhishek Shivakumar. Built with [Vite](https://vitejs.dev/), [Tailwind CSS](https://tailwindcss.com/), [daisyUI](https://daisyui.com/), [browser-image-compression](https://github.com/Donaldcwl/browser-image-compression), [ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm), [Express](https://expressjs.com/), [sharp](https://sharp.pixelplumbing.com/), [fluent-ffmpeg](https://github.com/fluent-ffmpeg/node-fluent-ffmpeg) and [Tauri](https://tauri.app/). To cite this work, see [CITATION.cff](CITATION.cff).
